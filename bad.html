@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Anonymous Message Form</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <style>
+    body {
+      background: #f7f7f7;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      position: relative;
+      overflow: hidden;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+/* Honeypot hidden field */
+    .hidden-field {
+        display: none !important;
+        visibility: hidden;
+        position: absolute;
+        left: -9999px;
+        height: 0;
+        width: 0;
+        overflow: hidden;
+} /*
+    / Spinner /
+    .spinner {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .spinner div {
+      width: 12px;
+      height: 12px;
+      margin: 3px;
+      background: #4CAF50;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spinner-bounce 0.6s infinite alternate;
+    }
+    .spinner div:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .spinner div:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes spinner-bounce {
+      from { transform: scale(1); }
+      to { transform: scale(1.5); }
+    }
+    / Success Message */
+    .success-popup {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .success-popup.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .success-popup svg {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 10px;
+      color: #4CAF50;
+    }
+    .success-popup p {
+      font-size: 18px;
+      color: #333;
+    }
+
+    @media screen and (orientation: portrait) {
+    #contact-form {
+      margin-top: -1200px;
+      width: 500px;
+      height: 500px;
+      display: flex;
+      justify-content: center;
+    }
+    #send-button {
+      margin-top: 20px;
+    }
+    textarea {
+    height: 300px;
+    width: 500px;
+    font-size: 25px;
+    }
+    #send-button {
+    font-size: 30px;
+    }
+}
+  </style>
+</head>
+
+<body>
+
+  <form id="contact-form">
+    <textarea name="message" placeholder="Write your anonymous message..." required></textarea>
+
+    <!-- Honeypot: bot trap -->
+    <input type="text" name="honeypot" class="hidden-field" autocomplete="off">
+
+    <button type="submit" id="send-button">Send Message</button>
+
+    <!-- Spinner -->
+    <div class="spinner" id="spinner">
+      <div></div><div></div><div></div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="success-popup" id="success-popup">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <p>Message Sent!</p>
+    </div>
+
+  </form>
+
+  <script>
+    (function(){
+      emailjs.init("JIwTa7ZadqHtck3Dc"); // Replace with your EmailJS public key
+    })();
+
+    const form = document.getElementById('contact-form');
+    const sendButton = document.getElementById('send-button');
+    const spinner = document.getElementById('spinner');
+    const successPopup = document.getElementById('success-popup');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Check honeypot field
+      if (this.honeypot.value !== "") {
+        alert("Spam detected.");
+        return;
+      }
+
+      // Show spinner and disable button
+      spinner.style.display = 'flex';
+      sendButton.disabled = true;
+      sendButton.textContent = 'Sending...';
+
+      emailjs.sendForm('service_myino04', 'template_mpvnykv', this)
+        .then(function() {
+            // Show success popup
+            form.reset();
+            successPopup.classList.add('active');
+            setTimeout(() => {
+              successPopup.classList.remove('active');
+              window.location.href = 'thankyou.html'; 
+            }, 3000); // Hide after 3 seconds
+        }, function(error) {
+            console.error('FAILED...', error);
+            alert('Failed to send. Please try again later.');
+        })
+        .finally(function() {
+            // Hide spinner and restore button
+            spinner.style.display = 'none';
+            sendButton.disabled = false;
+            sendButton.textContent = 'Send Message';
+        });
+    });
+    
+  </script>
+
+</body>
+</html>
